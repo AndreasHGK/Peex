@@ -7,8 +7,6 @@ I have personally tried multiple approaches for multiple handlers per player in 
 from manually calling other handlers in the main handler to more sophisticated approaches.
 Ultimately I think this approach is my favourite one so far.
 
-**CURRENTLY UNFINISHED AND NOT FULLY TESTED**
-
 ## How it works
 This section will show the basics of how peex works.
 The example used here will be a basic implementation of some sort of minigame system.
