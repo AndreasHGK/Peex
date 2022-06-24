@@ -7,6 +7,9 @@ import (
 	"sync"
 )
 
+//go:generate go run ./cmd/events/main.go -o events.go -p peex -m ./go.mod
+var _ player.Handler = (*Session)(nil)
+
 // Session is a unique object that stores a player's data and handles player events. Data is stored in components, which
 // can be added and removed from the Session at any time.
 type Session struct {
@@ -112,4 +115,8 @@ func (s *Session) query(queryFunc any, info queryFuncInfo) bool {
 
 	val.Call(args)
 	return true
+}
+
+func (s *Session) doQuit() {
+	delete(s.m.sessions, s.p.UUID())
 }

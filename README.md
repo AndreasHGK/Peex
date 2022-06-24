@@ -57,12 +57,14 @@ it was already present.
 Components can also be removed using `session.RemoveComponent(component)`.
 This will remove the component with the same type as the argument, if it exists, and return it.
 
-In our example you would add the component when a player joins a miningame and remove it when they leave it.
-
+In our example you would add the component when a player joins a miningame and remove it when they leave t.
+i
 #### Handlers
 Now that our player has components, we can write handlers to handle events for the player.
-A handler is just a `player.NopHandler` with an extra Events() function to specify
-which events are handled by the handler.
+A handler is just a struct that implements some methods fom `player.Handler`.
+Note that your handler does not actually need to implement `player.Handler`.
+In fact, it is recommended to **not implement events you dont use** for performance reasons.
+
 Struct fields can be used to add different queries to the handler.
 The handler will only run if all the queried components are present in the session
 and will also allow the handler to access these values.
@@ -71,8 +73,6 @@ Let's create a handler that will handle events when the player is in a minigame.
 We will make a simple that subtracts score when the player dies.
 ```go
 type MinigameHandler struct {
-    player.NopHandler
-    
     // peex will set the first *player.Player field it finds to the 
     // player that is the events. Has to be exported!
     Player  *player.Player
@@ -91,16 +91,12 @@ func (m MinigameHandler) HandleDeath() {
     m.MinigamePlayer.Load().Score -= 1
 }
 ```
-One method is currently missing, which is the Events() method.
-You can manually make it and specify which events you want to handle,
-but there is also a generator which makes this effortless.
-This generator is located in `cmd/handler`.
-You can pass along `-handler <handlerTypeName> -o <outputFileName>.go`, 
-and `-ptr` can be passed if you want the receiver to be a pointer.
-
 As seen before, handlers need to be registered when creating the manager.
 This means you cannot remove handlers on runtime.
-This wont be a problem due to the query system.
+This should not be a problem due to the query system:
+you can specify which handlers run by adding or removing components to/from a session.
+When you register a handler to the manager,
+it will automatically detect which events are implemented and only handle those events.
 
 #### Query functions
 Sometimes you want to run some logic on certain components, or only if certain

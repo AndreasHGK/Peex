@@ -2,18 +2,13 @@ package peex
 
 import (
 	"errors"
-	"github.com/andreashgk/peex/eventid"
 	"github.com/df-mc/dragonfly/server/player"
-	"github.com/zyedidia/generic/mapset"
 	"reflect"
 )
 
 // Handler is a struct that handles player-related events. It can query for certain components contained in the player
 // session, and will only run if all those components are present.
 type Handler interface {
-	// Events returns all events the Handler will handle. This is usually done through go:generate.
-	Events() mapset.Set[eventid.EventId]
-	player.Handler
 }
 
 /// Internal handler logic
@@ -27,7 +22,7 @@ type handlerInfo struct {
 	typ reflect.Type
 
 	components []componentQuery
-	events     mapset.Set[eventid.EventId]
+	events     map[eventId]struct{}
 
 	playerField  int
 	sessionField int
@@ -52,7 +47,7 @@ func (m *Manager) createHandlerInfo(h Handler) handlerInfo {
 	info := handlerInfo{
 		h:            h,
 		typ:          reflect.TypeOf(h),
-		events:       h.Events(),
+		events:       getHandlerEvents(h),
 		playerField:  -1,
 		sessionField: -1,
 	}
@@ -93,7 +88,7 @@ func (m *Manager) createHandlerInfo(h Handler) handlerInfo {
 }
 
 // handleEvent handles all shared logic for events, such as assigning query values.
-func (s *Session) handleEvent(eventId eventid.EventId, f func(h Handler)) {
+func (s *Session) handleEvent(eventId eventId, f func(h Handler)) {
 	s.componentsMu.RLock()
 	defer s.componentsMu.RUnlock()
 handlerLoop:
