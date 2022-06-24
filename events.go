@@ -54,11 +54,11 @@ const (
 )
 
 // getHandlerEvents returns which events a handler implements. Since it is impossible to distinguish actually imlemented
-// methods from ones embedded using player.NopHandler, it is recommended to not embed it at all. Most Peex handlers 
+// methods from ones embedded using player.NopHandler, it is recommended to not embed it at all. Most Peex handlers
 // won't implement player.Handler!
 func getHandlerEvents(h Handler) map[eventId]struct{} {
 	m := make(map[eventId]struct{})
-	
+
 	if _, ok := h.(eventMoveHandler); ok {
 		m[eventMove] = struct{}{}
 	}
@@ -155,7 +155,7 @@ func getHandlerEvents(h Handler) map[eventId]struct{} {
 	return m
 }
 
-var allEvents = []eventId {
+var allEvents = []eventId{
 	eventMove,
 	eventJump,
 	eventTeleport,
