@@ -118,5 +118,7 @@ func (s *Session) query(queryFunc any, info queryFuncInfo) bool {
 }
 
 func (s *Session) doQuit() {
+	s.m.sessionMu.Lock()
 	delete(s.m.sessions, s.p.UUID())
+	s.m.sessionMu.Unlock()
 }

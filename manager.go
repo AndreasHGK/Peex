@@ -1,14 +1,17 @@
 package peex
 
 import (
+	"errors"
 	"github.com/df-mc/dragonfly/server/player"
 	"github.com/google/uuid"
 	"reflect"
+	"sync"
 )
 
 // Manager stores all current sessions. It also contains all the registered handlers and component types.
 type Manager struct {
-	sessions map[uuid.UUID]*Session
+	sessions  map[uuid.UUID]*Session
+	sessionMu sync.RWMutex
 
 	handlerNextId  handlerId
 	handlerIdTable map[reflect.Type]handlerId
@@ -54,8 +57,14 @@ func New(handlers ...Handler) *Manager {
 	return m
 }
 
-// Accept assigns a Session to a player.
-func (m *Manager) Accept(p *player.Player) *Session {
+// Accept assigns a Session to a player. This also works for disconnected players or fake players.
+func (m *Manager) Accept(p *player.Player) (*Session, error) {
+	m.sessionMu.Lock()
+	defer m.sessionMu.Unlock()
+
+	if _, ok := m.sessions[p.UUID()]; ok {
+		return nil, errors.New("trying to handle a player that already has a handler")
+	}
 	s := &Session{
 		p:          p,
 		m:          m,
@@ -63,7 +72,7 @@ func (m *Manager) Accept(p *player.Player) *Session {
 	}
 	p.Handle(s)
 	m.sessions[p.UUID()] = s
-	return s
+	return s, nil
 }
 
 // QueryAll runs a query on all currently online players. This works the same as if a query is run on every Session
@@ -72,10 +81,12 @@ func (m *Manager) QueryAll(queryFunc any) int {
 	info := m.makeQueryFuncInfo(queryFunc)
 
 	count := 0
+	m.sessionMu.RLock()
 	for _, s := range m.sessions {
 		if s.query(queryFunc, info) {
 			count++
 		}
 	}
+	m.sessionMu.RUnlock()
 	return count
 }
