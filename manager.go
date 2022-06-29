@@ -75,6 +75,30 @@ func (m *Manager) Accept(p *player.Player) (*Session, error) {
 	return s, nil
 }
 
+// Sessions returns every session currently stored in the manager.
+func (m *Manager) Sessions() []*Session {
+	m.sessionMu.RLock()
+	sessions := make([]*Session, 0, len(m.sessions))
+	for _, s := range m.sessions {
+		sessions = append(sessions, s)
+	}
+	m.sessionMu.RUnlock()
+	return sessions
+}
+
+// SessionFromPlayer returns a player's session.
+func (m *Manager) SessionFromPlayer(p *player.Player) (*Session, bool) {
+	return m.SessionFromUUID(p.UUID())
+}
+
+// SessionFromUUID returns the session of the player with the corresponding UUID.
+func (m *Manager) SessionFromUUID(id uuid.UUID) (*Session, bool) {
+	m.sessionMu.RLock()
+	s, ok := m.sessions[id]
+	m.sessionMu.RUnlock()
+	return s, ok
+}
+
 // QueryAll runs a query on all currently online players. This works the same as if a query is run on every Session
 // separately (albeit slightly faster). A number of players on which the query executed successfully is returned.
 func (m *Manager) QueryAll(queryFunc any) int {
