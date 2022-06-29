@@ -2,6 +2,7 @@ package peex
 
 import (
 	"errors"
+	"github.com/df-mc/atomic"
 	"github.com/df-mc/dragonfly/server/player"
 	"reflect"
 	"sync"
@@ -13,16 +14,17 @@ var _ player.Handler = (*Session)(nil)
 // Session is a unique object that stores a player's data and handles player events. Data is stored in components, which
 // can be added and removed from the Session at any time.
 type Session struct {
-	p *player.Player
+	p atomic.Value[*player.Player]
 	m *Manager
 
 	components   map[componentId]Component
 	componentsMu sync.RWMutex
 }
 
-// Player returns the Player that owns the Session.
+// Player returns the Player that owns the Session. Returns nil if the Session is owned by a player that is no longer
+// online.
 func (s *Session) Player() *player.Player {
-	return s.p
+	return s.p.Load()
 }
 
 // Query runs a query function on the session. This function must use the Query, With and Option types as input
@@ -95,7 +97,7 @@ func (s *Session) RemoveComponent(c Component) Component {
 /// Internal session logic
 /// ----------------------
 
-// query executes a query function on the session (if it has all the requiured components.
+// query executes a query function on the session (if it has all the required components).
 func (s *Session) query(queryFunc any, info queryFuncInfo) bool {
 	val := reflect.ValueOf(queryFunc)
 	var args []reflect.Value
@@ -118,7 +120,16 @@ func (s *Session) query(queryFunc any, info queryFuncInfo) bool {
 }
 
 func (s *Session) doQuit() {
+	s.componentsMu.Lock()
+	defer s.componentsMu.RUnlock()
+
+	var p *player.Player
+	// A nil player means the session is offline
+	if !s.p.CompareAndSwap(p, nil) {
+		panic("session has already disconnected")
+	}
+
 	s.m.sessionMu.Lock()
-	delete(s.m.sessions, s.p.UUID())
+	delete(s.m.sessions, p.UUID())
 	s.m.sessionMu.Unlock()
 }
