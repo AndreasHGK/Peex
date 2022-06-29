@@ -1,7 +1,6 @@
 package peex
 
 import (
-	"github.com/df-mc/atomic"
 	"github.com/df-mc/dragonfly/server/player"
 	"github.com/google/uuid"
 	"reflect"
@@ -18,8 +17,6 @@ type Manager struct {
 
 	componentNextId  componentId
 	componentIdTable map[reflect.Type]componentId
-
-	started atomic.Value[bool]
 }
 
 // New creates a new Session Manager. It also inserts all the provided handlers into the manager. Events will be called
@@ -59,8 +56,6 @@ func New(handlers ...Handler) *Manager {
 
 // Accept assigns a Session to a player.
 func (m *Manager) Accept(p *player.Player) *Session {
-	m.started.Store(true)
-
 	s := &Session{
 		p:          p,
 		m:          m,
