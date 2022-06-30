@@ -150,8 +150,8 @@ func (s *Session) doQuit() {
 
 	var p *player.Player
 	// A nil player means the session is offline
-	if !s.p.CompareAndSwap(p, nil) {
-		panic("session has already disconnected")
+	if p = s.p.Swap(nil); p == nil {
+		panic("session owner has already disconnected")
 	}
 
 	s.m.sessionMu.Lock()
