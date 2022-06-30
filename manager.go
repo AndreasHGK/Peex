@@ -57,8 +57,10 @@ func New(handlers ...Handler) *Manager {
 	return m
 }
 
-// Accept assigns a Session to a player. This also works for disconnected players or fake players.
-func (m *Manager) Accept(p *player.Player) (*Session, error) {
+// Accept assigns a Session to a player. This also works for disconnected players or fake players. Initial components
+// can be provided for the player to start with. The add function will be called on any component that implements Adder.
+// Providing multiple components of the same type is not allowed and will return an error.
+func (m *Manager) Accept(p *player.Player, components ...Component) (*Session, error) {
 	m.sessionMu.Lock()
 	defer m.sessionMu.Unlock()
 
@@ -71,6 +73,14 @@ func (m *Manager) Accept(p *player.Player) (*Session, error) {
 	}
 	s.p.Store(p)
 	p.Handle(s)
+	// Insert all the components into the session. No mutex lock is needed, as it is not yet possible for any other
+	// goroutine to have access to the session yet.
+	for _, comp := range components {
+		err := s.insertComponent(m.getComponentId(comp), comp)
+		if err != nil {
+			return nil, err
+		}
+	}
 	m.sessions[p.UUID()] = s
 	return s, nil
 }

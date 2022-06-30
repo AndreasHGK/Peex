@@ -41,16 +41,8 @@ func (s *Session) InsertComponent(c Component) error {
 
 	s.componentsMu.Lock()
 	defer s.componentsMu.Unlock()
-	if _, ok := s.components[cId]; ok {
-		return errors.New("session already has a component of this type")
-	}
-
-	s.components[cId] = c
-	if a, ok := c.(Adder); ok {
-		a.Add(s.Player())
-	}
+	return s.insertComponent(cId, c)
 	// todo: recalculate handlers here?
-	return nil
 }
 
 // SetComponent updates the value of a Component currently present in the Session. This is done regardless of whether
@@ -137,6 +129,19 @@ func (s *Session) query(queryFunc any, info queryFuncInfo) bool {
 
 	val.Call(args)
 	return true
+}
+
+// insertComponent adds a component to the session. This method is not safe for use in multiple goroutines.
+func (s *Session) insertComponent(cId componentId, c Component) error {
+	if _, ok := s.components[cId]; ok {
+		return errors.New("session already has a component of this type")
+	}
+
+	s.components[cId] = c
+	if a, ok := c.(Adder); ok {
+		a.Add(s.Player())
+	}
+	return nil
 }
 
 func (s *Session) doQuit() {
