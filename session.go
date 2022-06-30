@@ -46,16 +46,33 @@ func (s *Session) InsertComponent(c Component) error {
 	}
 
 	s.components[cId] = c
+	if a, ok := c.(Adder); ok {
+		a.Add(s.Player())
+	}
 	// todo: recalculate handlers here?
 	return nil
 }
 
 // SetComponent updates the value of a Component currently present in the Session. This is done regardless of whether
-// this Component was present before.
+// this Component was present before. If the component was already present, and it implements Remover, the Remove method
+// will first be called on the previous instance of the component. The Add method will be called on the new Component if
+// it implements Adder.
 func (s *Session) SetComponent(c Component) {
 	cId := s.m.getComponentId(c)
 	s.componentsMu.Lock()
+
+	p := s.Player()
+	// If the component is already present, first call Remove() on the previous component if it implements it.
+	if prev, ok := s.components[cId]; ok {
+		if r, ok := prev.(Remover); ok {
+			r.Remove(p)
+		}
+	}
+
 	s.components[cId] = c
+	if a, ok := c.(Adder); ok {
+		a.Add(p)
+	}
 	// todo: recalculate handlers here?
 	s.componentsMu.Unlock()
 }
@@ -89,6 +106,9 @@ func (s *Session) RemoveComponent(c Component) Component {
 	}
 
 	c = s.components[cId]
+	if r, ok := c.(Remover); ok {
+		r.Remove(s.Player())
+	}
 	delete(s.components, cId)
 	// todo: recalculate handlers here?
 	return c
@@ -132,4 +152,11 @@ func (s *Session) doQuit() {
 	s.m.sessionMu.Lock()
 	delete(s.m.sessions, p.UUID())
 	s.m.sessionMu.Unlock()
+
+	for _, comp := range s.components {
+		if r, ok := comp.(Remover); ok {
+			r.Remove(p)
+		}
+	}
+	s.components = nil
 }
