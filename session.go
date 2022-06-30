@@ -121,7 +121,7 @@ func (s *Session) query(queryFunc any, info queryFuncInfo) bool {
 
 func (s *Session) doQuit() {
 	s.componentsMu.Lock()
-	defer s.componentsMu.RUnlock()
+	defer s.componentsMu.Unlock()
 
 	var p *player.Player
 	// A nil player means the session is offline
