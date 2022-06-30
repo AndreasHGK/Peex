@@ -48,7 +48,7 @@ func main() {
 		goModBuf := bytes.Buffer{}
 		goModBuf.ReadFrom(goMod)
 
-		matches := regexp.MustCompile("github\\.com/df-mc/dragonfly (v.+)\\n").FindStringSubmatch(goModBuf.String())
+		matches := regexp.MustCompile("github\\.com/df-mc/dragonfly (v.+?)\\r?\\n").FindStringSubmatch(goModBuf.String())
 		if len(matches) < 2 {
 			fmt.Fprintf(os.Stderr, "could not find dragonfly version in specified go modules file. is it installed?\n")
 			os.Exit(1)
@@ -194,7 +194,7 @@ func getHandlerEvents(h Handler) map[eventId]struct{} {
 	return m
 }
 
-var allEvents = []eventId {
+var allEvents = []eventId{
 	%s
 }
 
