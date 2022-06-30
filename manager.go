@@ -5,6 +5,7 @@ import (
 	"github.com/df-mc/dragonfly/server/player"
 	"github.com/google/uuid"
 	"reflect"
+	"strings"
 	"sync"
 )
 
@@ -49,6 +50,21 @@ func New(handlers ...Handler) *Manager {
 		m.handlers[m.handlerNextId] = info
 		for id, _ := range info.events {
 			m.eventHandlers[id] = append(m.eventHandlers[id], m.handlerNextId)
+		}
+
+		// Check if the handler (partially) implements a possibly outdated version of player.Handler, preventing events
+		// from being silently ignored.
+		for eventName, id := range allEvents {
+			if _, ok := info.events[id]; ok {
+				continue
+			}
+
+			// If the handler does have the method but does not implement the one specified in Peex it is probably an
+			// outdated handler method.
+			methodName := "Handle" + strings.TrimPrefix(eventName, "event")
+			if _, ok := t.MethodByName(methodName); ok {
+				panic("incompatible handler method: " + methodName + " (is Peex or the handler outdated?)")
+			}
 		}
 
 		// Make sure to increment the handlerId for the next handler!

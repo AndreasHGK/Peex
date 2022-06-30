@@ -133,7 +133,7 @@ func main() {
 			eventIds += "\n\t" + eventName
 		}
 
-		allEvents += "\n\t" + eventName + ","
+		allEvents += "\n\t\"" + eventName + "\": " + eventName + ","
 		funcParams := sourceContent[method.Pos()-1 : method.End()-1]
 		funcDecl := name + funcParams
 		interfaces += "\n" + fmt.Sprintf(interfaceTemplate, interfaceName, funcDecl)
@@ -194,7 +194,7 @@ func getHandlerEvents(h Handler) map[eventId]struct{} {
 	return m
 }
 
-var allEvents = []eventId{
+var allEvents = map[string]eventId{
 	%s
 }
 
