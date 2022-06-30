@@ -125,7 +125,7 @@ handlerLoop:
 		}
 
 		if info.playerField != -1 {
-			structType.Field(info.playerField).Set(reflect.ValueOf(s.p))
+			structType.Field(info.playerField).Set(reflect.ValueOf(s.Player()))
 		}
 		if info.sessionField != -1 {
 			structType.Field(info.sessionField).Set(reflect.ValueOf(s))
