@@ -66,10 +66,10 @@ func (m *Manager) Accept(p *player.Player) (*Session, error) {
 		return nil, errors.New("trying to handle a player that already has a handler")
 	}
 	s := &Session{
-		p:          p,
 		m:          m,
 		components: make(map[componentId]Component),
 	}
+	s.p.Store(p)
 	p.Handle(s)
 	m.sessions[p.UUID()] = s
 	return s, nil
