@@ -82,6 +82,7 @@ type MinigameHandler struct {
     // player that is the events. Has to be exported!
     Player  *player.Player
     Session *session.Session // same as above but for *session.Session
+	Manager *peex.Manager // ^
     
     // This parameter will make it so the handler only runs when the
     // specified component type is present. Different query types

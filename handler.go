@@ -26,6 +26,7 @@ type handlerInfo struct {
 
 	playerField  int
 	sessionField int
+	managerField int
 }
 
 type componentQuery struct {
@@ -50,6 +51,7 @@ func (m *Manager) createHandlerInfo(h Handler) handlerInfo {
 		events:       getHandlerEvents(h),
 		playerField:  -1,
 		sessionField: -1,
+		managerField: -1,
 	}
 	for i := 0; i < v.NumField(); i++ {
 		// Fields marked with a `ignore:""` tag will be ignored by the library.
@@ -79,6 +81,12 @@ func (m *Manager) createHandlerInfo(h Handler) handlerInfo {
 				continue
 			}
 			info.sessionField = i
+		case *Manager:
+			// We don't need to pass the same manager multiple times
+			if info.managerField != -1 {
+				continue
+			}
+			info.managerField = i
 		default:
 			continue
 		}
@@ -129,6 +137,9 @@ handlerLoop:
 		}
 		if info.sessionField != -1 {
 			structType.Field(info.sessionField).Set(reflect.ValueOf(s))
+		}
+		if info.managerField != -1 {
+			structType.Field(info.managerField).Set(reflect.ValueOf(s.m))
 		}
 
 		f(actualType.Interface().(Handler))
