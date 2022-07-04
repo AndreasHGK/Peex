@@ -7,6 +7,13 @@ I have personally tried multiple approaches for multiple handlers per player in 
 from manually calling other handlers in the main handler to more sophisticated approaches.
 Ultimately I think this approach is my favourite one so far.
 
+### Experimental/concept branch for component loading/saving.
+
+The aim of this branch is to allow for seamless use of data regardless of where the dats is or if the player is even 
+online. Components can have providers that will be called whenever a component is added/removed.
+There is a new `(*peex.Manager).QueryID()` function which can execute a query on both online and offline players.
+Read the function's documentation for more info.
+
 ## How it works
 This section will show the basics of how peex works.
 The example used here will be a basic implementation of some sort of minigame system.

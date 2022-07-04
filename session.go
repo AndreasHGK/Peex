@@ -2,6 +2,7 @@ package peex
 
 import (
 	"errors"
+	"fmt"
 	"github.com/df-mc/atomic"
 	"github.com/df-mc/dragonfly/server/player"
 	"reflect"
@@ -34,8 +35,58 @@ func (s *Session) Query(queryFunc any) bool {
 	return s.query(queryFunc, info)
 }
 
+// SaveAll saves every component that can be saved. If for any component an error is returned, the last error will be
+// returned by this function.
+func (s *Session) SaveAll() error {
+	var e error
+	uuid := s.Player().UUID()
+
+	s.componentsMu.RLock()
+	for id, p := range s.m.componentProvs {
+		c, ok := s.components[id]
+		if !ok {
+			continue
+		}
+		err := p.save(uuid, c)
+		// If there was an error saving the component, save it, so it can be returned. Will overwrite previous errors.
+		// Do not automatically return on error, as we want to minimize any data loss.
+		if err != nil {
+			e = err
+		}
+	}
+	s.componentsMu.RUnlock()
+
+	if e != nil {
+		return fmt.Errorf("error while saving component: %w", e)
+	}
+	return nil
+}
+
+// Save saves a single component type for the session. Saves the component of the same type as the argument that is
+// currently present as opposed to the one provided as argument.
+func (s *Session) Save(c Component) error {
+	s.componentsMu.RLock()
+	defer s.componentsMu.RUnlock()
+
+	cId := s.m.getComponentId(c)
+	c, ok := s.components[cId]
+	if !ok {
+		return errors.New("trying to save a component without a provider") // todo: should this return nil?
+	}
+	p, ok := s.m.componentProvs[cId]
+	if !ok {
+		return errors.New("trying to save a component without a provider")
+	}
+
+	err := p.save(s.Player().UUID(), c)
+	if err != nil {
+		return fmt.Errorf("error while saving component: %w", err)
+	}
+	return nil
+}
+
 // InsertComponent adds the Component to the player, keeping all it's values. An error is returned if the Component was
-// already present.
+// already present. Also loads the component if a provider for it has been set in the config.
 func (s *Session) InsertComponent(c Component) error {
 	cId := s.m.getComponentId(c)
 
@@ -49,6 +100,8 @@ func (s *Session) InsertComponent(c Component) error {
 // this Component was present before. If the component was already present, and it implements Remover, the Remove method
 // will first be called on the previous instance of the component. The Add method will be called on the new Component if
 // it implements Adder.
+//
+// NOTE: does NOT load the component!
 func (s *Session) SetComponent(c Component) {
 	cId := s.m.getComponentId(c)
 	s.componentsMu.Lock()
@@ -84,26 +137,16 @@ func (s *Session) Component(c Component) (Component, bool) {
 
 // RemoveComponent tries to remove the component with the same type as the provided argument from the Session. The value
 // of the component will also be returned, If the Session does not have the component, nothing happens, and nil is
-// returned.
-func (s *Session) RemoveComponent(c Component) Component {
+// returned. Also saves the component if a provider for it has been set in the config.
+func (s *Session) RemoveComponent(c Component) (Component, error) {
 	cId, ok := s.m.componentIdTable[reflect.TypeOf(c)]
 	if !ok {
-		return nil
+		return nil, errors.New("trying to remove unknown component")
 	}
 
 	s.componentsMu.Lock()
 	defer s.componentsMu.Unlock()
-	if _, ok := s.components[cId]; !ok {
-		return nil
-	}
-
-	c = s.components[cId]
-	if r, ok := c.(Remover); ok {
-		r.Remove(s.Player())
-	}
-	delete(s.components, cId)
-	// todo: recalculate handlers here?
-	return c
+	return s.removeComponent(cId, c)
 }
 
 /// Internal session logic
@@ -112,7 +155,7 @@ func (s *Session) RemoveComponent(c Component) Component {
 // query executes a query function on the session (if it has all the required components).
 func (s *Session) query(queryFunc any, info queryFuncInfo) bool {
 	val := reflect.ValueOf(queryFunc)
-	var args []reflect.Value
+	args := make([]reflect.Value, 0, len(info.params))
 
 	s.componentsMu.RLock()
 	defer s.componentsMu.RUnlock()
@@ -137,6 +180,13 @@ func (s *Session) insertComponent(cId componentId, c Component) error {
 		return errors.New("session already has a component of this type")
 	}
 
+	// Try to load the component if it has a provider.
+	if p, ok := s.m.componentProvs[cId]; ok {
+		err := p.load(s.Player().UUID(), c)
+		if err != nil {
+			return fmt.Errorf("error while loading component: %w", err)
+		}
+	}
 	s.components[cId] = c
 	if a, ok := c.(Adder); ok {
 		a.Add(s.Player())
@@ -144,9 +194,38 @@ func (s *Session) insertComponent(cId componentId, c Component) error {
 	return nil
 }
 
+// removeComponent removes a component from the session. This method is not safe for use in multiple goroutines.
+func (s *Session) removeComponent(cId componentId, c Component) (Component, error) {
+	if _, ok := s.components[cId]; !ok {
+		return nil, errors.New("trying to remove a component not present in the session")
+	}
+
+	c = s.components[cId]
+	if r, ok := c.(Remover); ok {
+		r.Remove(s.Player())
+	}
+	// Try to save the component
+	if p, ok := s.m.componentProvs[cId]; ok {
+		err := p.save(s.Player().UUID(), c)
+		if err != nil {
+			return nil, fmt.Errorf("error while saving component: %w", err)
+		}
+	}
+	delete(s.components, cId)
+	// todo: recalculate handlers here?
+	return c, nil
+}
+
 func (s *Session) doQuit() {
 	s.componentsMu.Lock()
 	defer s.componentsMu.Unlock()
+
+	for _, comp := range s.components {
+		_, err := s.removeComponent(s.m.getComponentId(comp), comp)
+		if err != nil && s.m.logger != nil {
+			s.m.logger.Errorf("%w", err)
+		}
+	}
 
 	var p *player.Player
 	// A nil player means the session is offline
@@ -157,11 +236,5 @@ func (s *Session) doQuit() {
 	s.m.sessionMu.Lock()
 	delete(s.m.sessions, p.UUID())
 	s.m.sessionMu.Unlock()
-
-	for _, comp := range s.components {
-		if r, ok := comp.(Remover); ok {
-			r.Remove(p)
-		}
-	}
 	s.components = nil
 }
