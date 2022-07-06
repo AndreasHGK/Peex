@@ -27,6 +27,8 @@ type handlerInfo struct {
 	playerField  int
 	sessionField int
 	managerField int
+
+	copyFields []int // fields that need to be copied over to a new instance of the handler
 }
 
 type componentQuery struct {
@@ -61,7 +63,9 @@ func (m *Manager) createHandlerInfo(h Handler) handlerInfo {
 
 		// Ignore unexported fields
 		if !v.Field(i).CanInterface() {
-			m.logger.Debugf("warning: unexported handler fields cannot be copied by Peex")
+			if m.logger != nil {
+				m.logger.Debugf("warning: unexported handler fields cannot be copied by Peex")
+			}
 			continue
 		}
 		switch x := v.Field(i).Interface().(type) {
@@ -93,6 +97,7 @@ func (m *Manager) createHandlerInfo(h Handler) handlerInfo {
 			}
 			info.managerField = i
 		default:
+			info.copyFields = append(info.copyFields, i)
 			continue
 		}
 	}
@@ -145,6 +150,14 @@ handlerLoop:
 		}
 		if info.managerField != -1 {
 			structType.Field(info.managerField).Set(reflect.ValueOf(s.m))
+		}
+
+		// Copy the other fields if there are any
+		if len(info.copyFields) > 0 {
+			hVal := reflect.ValueOf(info.h)
+			for _, fieldNum := range info.copyFields {
+				structType.Field(fieldNum).Set(hVal.Elem().Field(fieldNum))
+			}
 		}
 
 		f(actualType.Interface().(Handler))
