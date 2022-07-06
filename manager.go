@@ -25,7 +25,7 @@ type Manager struct {
 
 	componentNextId  componentId
 	componentIdTable map[reflect.Type]componentId
-	componentProvs   map[componentId]GenericProvider
+	componentProvs   map[componentId]ComponentProvider
 	// todo: component cache
 }
 
@@ -40,7 +40,7 @@ func New(cfg Config) *Manager {
 		handlers:         map[handlerId]handlerInfo{},
 		eventHandlers:    map[eventId][]handlerId{},
 		componentIdTable: map[reflect.Type]componentId{},
-		componentProvs:   map[componentId]GenericProvider{},
+		componentProvs:   map[componentId]ComponentProvider{},
 	}
 	for _, id := range allEvents {
 		m.eventHandlers[id] = []handlerId{}

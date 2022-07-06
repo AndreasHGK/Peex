@@ -5,8 +5,8 @@ import (
 	"reflect"
 )
 
-// ComponentProvider represent a struct that can load & save data associated to a player for a certain component.
-type ComponentProvider[c Component] interface {
+// GenericProvider represent a struct that can load & save data associated to a player for a certain component.
+type GenericProvider[c Component] interface {
 	// Load loads & writes data stored under the provider UUID to the pointer to the component c. Comp can be nil if it
 	// is being loaded from an offline player.
 	Load(id uuid.UUID, comp *c) error
@@ -14,14 +14,14 @@ type ComponentProvider[c Component] interface {
 	Save(id uuid.UUID, comp *c) error
 }
 
-// ProviderWrapper is a wrapper around a ComponentProvider to ensure strict typing of components and to easily allow for Peex
+// ProviderWrapper is a wrapper around a GenericProvider to ensure strict typing of components and to easily allow for Peex
 // to resolve the component type.
 type ProviderWrapper[c Component] struct {
-	p ComponentProvider[c]
+	p GenericProvider[c]
 }
 
 // WrapProvider creates a new wrapper around a provider of the desired type.
-func WrapProvider[c Component](p ComponentProvider[c]) ProviderWrapper[c] {
+func WrapProvider[c Component](p GenericProvider[c]) ProviderWrapper[c] {
 	if p == nil {
 		panic("cannot provide nil as a provider")
 	}
@@ -33,8 +33,8 @@ func WrapProvider[c Component](p ComponentProvider[c]) ProviderWrapper[c] {
 /// Internal provider logic
 /// -----------------------
 
-// GenericProvider is the interface representation of any type of ProviderWrapper, allowing them to be passed in the Config.
-type GenericProvider interface {
+// ComponentProvider is the interface representation of any type of ProviderWrapper, allowing them to be passed in the Config.
+type ComponentProvider interface {
 	load(id uuid.UUID, x any) error
 	loadNew(id uuid.UUID) (any, error)
 	save(id uuid.UUID, x any) error

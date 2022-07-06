@@ -14,5 +14,5 @@ type Config struct {
 	Handlers []Handler
 	// Providers allows for passing of a list of ComponentProviders which can load & save components for players at
 	// runtime. The providers must be wrapped in a ProviderWrapper using the WrapProvider function.
-	Providers []GenericProvider
+	Providers []ComponentProvider
 }
