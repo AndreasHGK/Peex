@@ -13,6 +13,6 @@ type Config struct {
 	// but can be controlled through adding or removing components from users.
 	Handlers []Handler
 	// Providers allows for passing of a list of ComponentProviders which can load & save components for players at
-	// runtime. The providers must be wrapped in a Provider using the NewProvider function.
+	// runtime. The providers must be wrapped in a ProviderWrapper using the WrapProvider function.
 	Providers []GenericProvider
 }

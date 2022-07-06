@@ -14,18 +14,18 @@ type ComponentProvider[c Component] interface {
 	Save(id uuid.UUID, comp *c) error
 }
 
-// Provider is a wrapper around a ComponentProvider to ensure strict typing of components and to easily allow for Peex
+// ProviderWrapper is a wrapper around a ComponentProvider to ensure strict typing of components and to easily allow for Peex
 // to resolve the component type.
-type Provider[c Component] struct {
+type ProviderWrapper[c Component] struct {
 	p ComponentProvider[c]
 }
 
-// NewProvider creates a new wrapper around a provider of the desired type.
-func NewProvider[c Component](p ComponentProvider[c]) Provider[c] {
+// WrapProvider creates a new wrapper around a provider of the desired type.
+func WrapProvider[c Component](p ComponentProvider[c]) ProviderWrapper[c] {
 	if p == nil {
 		panic("cannot provide nil as a provider")
 	}
-	return Provider[c]{
+	return ProviderWrapper[c]{
 		p: p,
 	}
 }
@@ -33,7 +33,7 @@ func NewProvider[c Component](p ComponentProvider[c]) Provider[c] {
 /// Internal provider logic
 /// -----------------------
 
-// GenericProvider is the interface representation of any type of Provider, allowing them to be passed in the Config.
+// GenericProvider is the interface representation of any type of ProviderWrapper, allowing them to be passed in the Config.
 type GenericProvider interface {
 	load(id uuid.UUID, x any) error
 	loadNew(id uuid.UUID) (any, error)
@@ -43,11 +43,11 @@ type GenericProvider interface {
 	componentName() string
 }
 
-func (p Provider[c]) load(id uuid.UUID, x any) error {
+func (p ProviderWrapper[c]) load(id uuid.UUID, x any) error {
 	return p.p.Load(id, x.(*c))
 }
 
-func (p Provider[c]) loadNew(id uuid.UUID) (any, error) {
+func (p ProviderWrapper[c]) loadNew(id uuid.UUID) (any, error) {
 	v := new(c)
 	err := p.p.Load(id, v)
 	if err != nil {
@@ -56,15 +56,15 @@ func (p Provider[c]) loadNew(id uuid.UUID) (any, error) {
 	return v, nil
 }
 
-func (p Provider[c]) save(id uuid.UUID, x any) error {
+func (p ProviderWrapper[c]) save(id uuid.UUID, x any) error {
 	return p.p.Save(id, x.(*c))
 }
 
-func (p Provider[c]) componentId(m *Manager) componentId {
+func (p ProviderWrapper[c]) componentId(m *Manager) componentId {
 	return m.getComponentId(new(c))
 }
 
-func (p Provider[c]) componentName() string {
+func (p ProviderWrapper[c]) componentName() string {
 	t := reflect.TypeOf(new(c))
 	return t.Name()
 }
