@@ -61,6 +61,7 @@ func (m *Manager) createHandlerInfo(h Handler) handlerInfo {
 
 		// Ignore unexported fields
 		if !v.Field(i).CanInterface() {
+			m.logger.Debugf("warning: unexported handler fields cannot be copied by Peex")
 			continue
 		}
 		switch x := v.Field(i).Interface().(type) {
