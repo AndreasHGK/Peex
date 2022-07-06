@@ -59,6 +59,10 @@ func (m *Manager) createHandlerInfo(h Handler) handlerInfo {
 			continue
 		}
 
+		// Ignore unexported fields
+		if !v.Field(i).CanInterface() {
+			continue
+		}
 		switch x := v.Field(i).Interface().(type) {
 		case queryType:
 			fieldType := x.getType()
