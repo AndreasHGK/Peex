@@ -191,6 +191,10 @@ func (m *Manager) QueryID(id uuid.UUID, queryFunc any) (bool, error) {
 		}()
 		// See if we can turn the value into an argument, or if something went wrong.
 		if ok && err == nil {
+			if param.direct {
+				args = append(args, reflect.ValueOf(c))
+				continue
+			}
 			args = append(args, reflect.ValueOf(param.query.set(c)))
 		} else if err != nil {
 			return false, err
@@ -199,6 +203,7 @@ func (m *Manager) QueryID(id uuid.UUID, queryFunc any) (bool, error) {
 				return false, nil
 			}
 			args = append(args, reflect.ValueOf(param.query))
+			continue
 		}
 	}
 

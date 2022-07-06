@@ -78,6 +78,7 @@ type queryFuncInfo struct {
 type queryFuncParam struct {
 	cId      componentId
 	optional bool
+	direct   bool
 
 	query queryType
 }
@@ -90,23 +91,27 @@ func (m *Manager) makeQueryFuncInfo(f any) queryFuncInfo {
 
 	info := queryFuncInfo{}
 	for i := 0; i < t.NumIn(); i++ {
+		param := queryFuncParam{}
+
 		in := t.In(i)
-		query, ok := reflect.New(in).Interface().(queryType)
-		if !ok {
-			panic("query func must only have query types (Query, With, Option)")
+		if cId, ok := m.componentIdTable[in]; ok {
+			param.cId = cId
+			param.direct = true
+		} else {
+			var ok bool
+			param.query, ok = reflect.New(in).Interface().(queryType)
+			if !ok {
+				panic("query func must only have query types (Query, With, Option)")
+			}
+
+			param.cId, ok = m.componentIdTable[param.query.getType()]
+			// If the component is not registered, the player does not have this component
+			if !ok {
+				continue
+			}
 		}
 
-		cId, ok := m.componentIdTable[query.getType()]
-		// If the component is not registered, the player does not have this component
-		if !ok {
-			continue
-		}
-
-		info.params = append(info.params, queryFuncParam{
-			cId:      cId,
-			optional: query.optional(),
-			query:    query,
-		})
+		info.params = append(info.params, param)
 	}
 	return info
 }

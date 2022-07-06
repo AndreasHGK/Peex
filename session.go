@@ -167,6 +167,10 @@ func (s *Session) query(queryFunc any, info queryFuncInfo) bool {
 			continue
 		}
 
+		if param.direct {
+			args = append(args, reflect.ValueOf(c))
+			continue
+		}
 		args = append(args, reflect.ValueOf(param.query.set(c)))
 	}
 

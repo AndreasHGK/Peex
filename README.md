@@ -118,7 +118,9 @@ didRun := session.Query(func(q1 peex.Query[*MinigamePlayer]) {
     q1.Load().Team = newTeam
 })
 ```
-Here didRun is a boolean that returns whether the the query was able to run or not.
+Here didRun is a boolean that returns whether the query was able to run or not.
+In query functions the `peex.Query[]` around the component type can be omitted.
+When using another query type like Option, you will still need to include it.
 
 You can also run queries on multiple players at once, using the manager.QueryAll() method.
 This works the same as session.Query(), just for every player.
