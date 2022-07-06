@@ -7,14 +7,9 @@ I have personally tried multiple approaches for multiple handlers per player in 
 from manually calling other handlers in the main handler to more sophisticated approaches.
 Ultimately I think this approach is my favourite one so far.
 
-### Experimental/concept branch for component loading/saving.
-
-The aim of this branch is to allow for seamless use of data regardless of where the dats is or if the player is even 
-online. Components can have providers that will be called whenever a component is added/removed.
-There is a new `(*peex.Manager).QueryID()` function which can execute a query on both online and offline players.
-Read the function's documentation for more info.
-
 ## How it works
+
+### Basics
 This section will show the basics of how peex works.
 The example used here will be a basic implementation of some sort of minigame system.
 
@@ -23,7 +18,10 @@ Firstly you will need to make a new `*peex.Manager`.
 This will store all active sessions, and will allow you to assign a session to a player.
 
 ```go
-manager := peex.New( /* ... handlers go here (more on that shortly). */ )
+manager := peex.New(peex.Config{
+	// ... (some fields are omitted)
+	Handlers: []peex.Handler{ /* ... handlers go here (more on that shortly). */ }
+})
 
 // Ideally, run this when the player joins to assign them a session.
 session := manager.Accept(player)
@@ -125,3 +123,62 @@ When using another query type like Option, you will still need to include it.
 You can also run queries on multiple players at once, using the manager.QueryAll() method.
 This works the same as session.Query(), just for every player.
 The method will return the amount of players the function actually ran for.
+
+### Data Persistence
+
+You may want to automatically load and save data for some components.
+This is also supported in the library using component providers,
+and working with persistent data for both online and offline players is similar to before.
+
+#### Providers
+
+A provider is just a struct that implements a Save and Load method for a component.
+Say we want to have a provider for `*SampleComponent`, the provider would look something like this:
+```go
+type SampleProvider struct { /* ... */ }
+
+func (SampleProvider) Load(id uuid.UUID, comp *SampleComponent) error {
+	/* implementation ... */
+}
+
+func (SampleProvider) Save(id uuid.UUID, comp *SampleComponent) error {
+    /* implementation ... */
+}
+```
+Note that the component type must be a pointer.
+
+After creating the provider for the component, you may register it to the manager by adding it to the `peex.Config`.
+It needs to be wrapped in a `peex.ProviderWrapper` to allow peex to use the provider regardless of the component type
+while keeping strict typing.
+```go
+manager := peex.New(peex.Config{
+	// ... (some fields are omitted)
+	Providers: []peex.ComponentProvider{
+		peex.WrapProvider(SampleProvider{}),
+		/* ... more providers go here. */
+	}
+})
+```
+Now, when the `SampleComponent` is inserted into a session,
+the provider will first have its Load function called to load any data into the component.
+When the component is removed, it will also be saved again.
+
+Notice that we did not have to modify the actual component at all.
+This allows for providers to be seamlessly swapped out.
+
+#### UUID Queries
+
+You may want to query a component regardless of whether the player's session currently has this component,
+or even when the player is offline altogether.
+For this you can perform a query function by a player UUID.
+
+This is almost the same as a normal query, except it will try to load a component if it was not present in the session
+or the player is offline. The query will not run if at least one component is not present in the session and it has no
+provider, or if a component could not be loaded. 
+Any loaded components will be saved again after the function has run.
+An error is returned when there was an error loading or saving a component.
+```go
+didRun, err := manager.QueryID(func(q1 peex.Query[*SampleComponent]) {
+    /* do stuff */
+})
+```
