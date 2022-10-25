@@ -6,8 +6,6 @@ import (
 	"github.com/df-mc/dragonfly/server/block/cube"
 	"github.com/df-mc/dragonfly/server/cmd"
 	"github.com/df-mc/dragonfly/server/entity"
-	"github.com/df-mc/dragonfly/server/entity/damage"
-	"github.com/df-mc/dragonfly/server/entity/healing"
 	"github.com/df-mc/dragonfly/server/event"
 	"github.com/df-mc/dragonfly/server/item"
 	"github.com/df-mc/dragonfly/server/player/skin"
@@ -222,15 +220,15 @@ type eventFoodLossHandler interface {
 }
 
 type eventHealHandler interface {
-	HandleHeal(ctx *event.Context, health *float64, src healing.Source)
+	HandleHeal(ctx *event.Context, health *float64, src world.HealingSource)
 }
 
 type eventHurtHandler interface {
-	HandleHurt(ctx *event.Context, damage *float64, attackImmunity *time.Duration, src damage.Source)
+	HandleHurt(ctx *event.Context, damage *float64, attackImmunity *time.Duration, src world.DamageSource)
 }
 
 type eventDeathHandler interface {
-	HandleDeath(src damage.Source)
+	HandleDeath(src world.DamageSource, keepInv *bool)
 }
 
 type eventRespawnHandler interface {
@@ -361,21 +359,21 @@ func (s *Session) HandleFoodLoss(ctx *event.Context, from, to int) {
 	})
 }
 
-func (s *Session) HandleHeal(ctx *event.Context, health *float64, src healing.Source) {
+func (s *Session) HandleHeal(ctx *event.Context, health *float64, src world.HealingSource) {
 	s.handleEvent(eventHeal, func(h Handler) {
 		h.(eventHealHandler).HandleHeal(ctx, health, src)
 	})
 }
 
-func (s *Session) HandleHurt(ctx *event.Context, damage *float64, attackImmunity *time.Duration, src damage.Source) {
+func (s *Session) HandleHurt(ctx *event.Context, damage *float64, attackImmunity *time.Duration, src world.DamageSource) {
 	s.handleEvent(eventHurt, func(h Handler) {
 		h.(eventHurtHandler).HandleHurt(ctx, damage, attackImmunity, src)
 	})
 }
 
-func (s *Session) HandleDeath(src damage.Source) {
+func (s *Session) HandleDeath(src world.DamageSource, keepInv *bool) {
 	s.handleEvent(eventDeath, func(h Handler) {
-		h.(eventDeathHandler).HandleDeath(src)
+		h.(eventDeathHandler).HandleDeath(src, keepInv)
 	})
 }
 
