@@ -60,8 +60,8 @@ it was already present.
 Components can also be removed using `session.RemoveComponent(component)`.
 This will remove the component with the same type as the argument, if it exists, and return it.
 
-In our example you would add the component when a player joins a miningame and remove it when they leave t.
-i
+In our example you would add the component when a player joins a minigame and remove it when they leave it.
+
 #### Handlers
 Now that our player has components, we can write handlers to handle events for the player.
 A handler is just a struct that implements some methods fom `player.Handler`.
@@ -73,7 +73,7 @@ The handler will only run if all the queried components are present in the sessi
 and will also allow the handler to access these values.
 
 Let's create a handler that will handle events when the player is in a minigame.
-We will make a simple that subtracts score when the player dies.
+We will make a simple one that subtracts from the score when the player dies.
 ```go
 type MinigameHandler struct {
     // peex will set the first *player.Player field it finds to the 
