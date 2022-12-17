@@ -216,7 +216,7 @@ type eventChatHandler interface {
 }
 
 type eventFoodLossHandler interface {
-	HandleFoodLoss(ctx *event.Context, from, to int)
+	HandleFoodLoss(ctx *event.Context, from int, to *int)
 }
 
 type eventHealHandler interface {
@@ -244,7 +244,7 @@ type eventStartBreakHandler interface {
 }
 
 type eventBlockBreakHandler interface {
-	HandleBlockBreak(ctx *event.Context, pos cube.Pos, drops *[]item.Stack)
+	HandleBlockBreak(ctx *event.Context, pos cube.Pos, drops *[]item.Stack, xp *int)
 }
 
 type eventBlockPlaceHandler interface {
@@ -353,7 +353,7 @@ func (s *Session) HandleChat(ctx *event.Context, message *string) {
 	})
 }
 
-func (s *Session) HandleFoodLoss(ctx *event.Context, from, to int) {
+func (s *Session) HandleFoodLoss(ctx *event.Context, from int, to *int) {
 	s.handleEvent(eventFoodLoss, func(h Handler) {
 		h.(eventFoodLossHandler).HandleFoodLoss(ctx, from, to)
 	})
@@ -395,9 +395,9 @@ func (s *Session) HandleStartBreak(ctx *event.Context, pos cube.Pos) {
 	})
 }
 
-func (s *Session) HandleBlockBreak(ctx *event.Context, pos cube.Pos, drops *[]item.Stack) {
+func (s *Session) HandleBlockBreak(ctx *event.Context, pos cube.Pos, drops *[]item.Stack, xp *int) {
 	s.handleEvent(eventBlockBreak, func(h Handler) {
-		h.(eventBlockBreakHandler).HandleBlockBreak(ctx, pos, drops)
+		h.(eventBlockBreakHandler).HandleBlockBreak(ctx, pos, drops, xp)
 	})
 }
 
