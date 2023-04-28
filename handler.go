@@ -2,8 +2,9 @@ package peex
 
 import (
 	"errors"
-	"github.com/df-mc/dragonfly/server/player"
 	"reflect"
+
+	"github.com/df-mc/dragonfly/server/player"
 )
 
 // Handler is a struct that handles player-related events. It can query for certain components contained in the player
@@ -44,7 +45,7 @@ func (m *Manager) createHandlerInfo(h Handler) handlerInfo {
 		v = v.Elem()
 	}
 	if v.Kind() != reflect.Struct {
-		panic(errors.New("A handler must be of type struct, or a pointer to a one"))
+		panic(errors.New("a handler must be of type struct, or a pointer to a one"))
 	}
 
 	info := handlerInfo{

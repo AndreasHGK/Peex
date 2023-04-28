@@ -3,12 +3,13 @@ package peex
 import (
 	"errors"
 	"fmt"
-	"github.com/df-mc/dragonfly/server"
-	"github.com/df-mc/dragonfly/server/player"
-	"github.com/google/uuid"
 	"reflect"
 	"strings"
 	"sync"
+
+	"github.com/df-mc/dragonfly/server"
+	"github.com/df-mc/dragonfly/server/player"
+	"github.com/google/uuid"
 )
 
 // Manager stores all current sessions. It also contains all the registered handlers and component types.
@@ -56,7 +57,7 @@ func New(cfg Config) *Manager {
 		m.handlerIdTable[t] = m.handlerNextId
 		info := m.createHandlerInfo(h)
 		m.handlers[m.handlerNextId] = info
-		for id, _ := range info.events {
+		for id := range info.events {
 			m.eventHandlers[id] = append(m.eventHandlers[id], m.handlerNextId)
 		}
 

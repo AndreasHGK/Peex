@@ -3,6 +3,9 @@
 package peex
 
 import (
+	"net"
+	"time"
+
 	"github.com/df-mc/dragonfly/server/block/cube"
 	"github.com/df-mc/dragonfly/server/cmd"
 	"github.com/df-mc/dragonfly/server/event"
@@ -10,8 +13,6 @@ import (
 	"github.com/df-mc/dragonfly/server/player/skin"
 	"github.com/df-mc/dragonfly/server/world"
 	"github.com/go-gl/mathgl/mgl64"
-	"net"
-	"time"
 )
 
 type eventId uint
@@ -51,11 +52,11 @@ const (
 )
 
 // getHandlerEvents returns which events a handler implements. Since it is impossible to distinguish actually imlemented
-// methods from ones embedded using player.NopHandler, it is recommended to not embed it at all. Most Peex handlers 
+// methods from ones embedded using player.NopHandler, it is recommended to not embed it at all. Most Peex handlers
 // won't implement player.Handler!
 func getHandlerEvents(h Handler) map[eventId]struct{} {
 	m := make(map[eventId]struct{})
-	
+
 	if _, ok := h.(eventMoveHandler); ok {
 		m[eventMove] = struct{}{}
 	}
@@ -153,37 +154,37 @@ func getHandlerEvents(h Handler) map[eventId]struct{} {
 }
 
 var allEvents = map[string]eventId{
-	"eventMove": eventMove,
-	"eventJump": eventJump,
-	"eventTeleport": eventTeleport,
-	"eventChangeWorld": eventChangeWorld,
-	"eventToggleSprint": eventToggleSprint,
-	"eventToggleSneak": eventToggleSneak,
-	"eventChat": eventChat,
-	"eventFoodLoss": eventFoodLoss,
-	"eventHeal": eventHeal,
-	"eventHurt": eventHurt,
-	"eventDeath": eventDeath,
-	"eventRespawn": eventRespawn,
-	"eventSkinChange": eventSkinChange,
-	"eventStartBreak": eventStartBreak,
-	"eventBlockBreak": eventBlockBreak,
-	"eventBlockPlace": eventBlockPlace,
-	"eventBlockPick": eventBlockPick,
-	"eventItemUse": eventItemUse,
-	"eventItemUseOnBlock": eventItemUseOnBlock,
-	"eventItemUseOnEntity": eventItemUseOnEntity,
-	"eventItemConsume": eventItemConsume,
-	"eventAttackEntity": eventAttackEntity,
-	"eventExperienceGain": eventExperienceGain,
-	"eventPunchAir": eventPunchAir,
-	"eventSignEdit": eventSignEdit,
-	"eventItemDamage": eventItemDamage,
-	"eventItemPickup": eventItemPickup,
-	"eventItemDrop": eventItemDrop,
-	"eventTransfer": eventTransfer,
+	"eventMove":             eventMove,
+	"eventJump":             eventJump,
+	"eventTeleport":         eventTeleport,
+	"eventChangeWorld":      eventChangeWorld,
+	"eventToggleSprint":     eventToggleSprint,
+	"eventToggleSneak":      eventToggleSneak,
+	"eventChat":             eventChat,
+	"eventFoodLoss":         eventFoodLoss,
+	"eventHeal":             eventHeal,
+	"eventHurt":             eventHurt,
+	"eventDeath":            eventDeath,
+	"eventRespawn":          eventRespawn,
+	"eventSkinChange":       eventSkinChange,
+	"eventStartBreak":       eventStartBreak,
+	"eventBlockBreak":       eventBlockBreak,
+	"eventBlockPlace":       eventBlockPlace,
+	"eventBlockPick":        eventBlockPick,
+	"eventItemUse":          eventItemUse,
+	"eventItemUseOnBlock":   eventItemUseOnBlock,
+	"eventItemUseOnEntity":  eventItemUseOnEntity,
+	"eventItemConsume":      eventItemConsume,
+	"eventAttackEntity":     eventAttackEntity,
+	"eventExperienceGain":   eventExperienceGain,
+	"eventPunchAir":         eventPunchAir,
+	"eventSignEdit":         eventSignEdit,
+	"eventItemDamage":       eventItemDamage,
+	"eventItemPickup":       eventItemPickup,
+	"eventItemDrop":         eventItemDrop,
+	"eventTransfer":         eventTransfer,
 	"eventCommandExecution": eventCommandExecution,
-	"eventQuit": eventQuit,
+	"eventQuit":             eventQuit,
 }
 
 type eventMoveHandler interface {
