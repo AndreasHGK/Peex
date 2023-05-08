@@ -3,6 +3,9 @@
 package peex
 
 import (
+	"net"
+	"time"
+
 	"github.com/df-mc/dragonfly/server/block/cube"
 	"github.com/df-mc/dragonfly/server/cmd"
 	"github.com/df-mc/dragonfly/server/event"
@@ -10,8 +13,6 @@ import (
 	"github.com/df-mc/dragonfly/server/player/skin"
 	"github.com/df-mc/dragonfly/server/world"
 	"github.com/go-gl/mathgl/mgl64"
-	"net"
-	"time"
 )
 
 type eventId uint

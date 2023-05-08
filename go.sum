@@ -13,6 +13,8 @@ github.com/df-mc/dragonfly v0.9.5-0.20230426093003-e57481510385 h1:Fo3TXHzqNR6G0
 github.com/df-mc/dragonfly v0.9.5-0.20230426093003-e57481510385/go.mod h1:prDDLypRsdjJ/e7iQWFxqJu7H7YaVIIHjOjrdxFZLR8=
 github.com/df-mc/dragonfly v0.9.5 h1:xdmmUwQmW3GgTjvnVxlT+oYc2YGa53fEWQOAoGuIA4E=
 github.com/df-mc/dragonfly v0.9.5/go.mod h1:sXcjY5O4U3IcH7zrb9cen7vrvJbaShFV/oipoj0M+G8=
+github.com/df-mc/dragonfly v0.9.6-0.20230507195931-1877140372de h1:kvfX+H4JKm6x+2YDGjGNBTzsn8KazLiBKlrNRIrVCE0=
+github.com/df-mc/dragonfly v0.9.6-0.20230507195931-1877140372de/go.mod h1:sXcjY5O4U3IcH7zrb9cen7vrvJbaShFV/oipoj0M+G8=
 github.com/df-mc/goleveldb v1.1.9 h1:ihdosZyy5jkQKrxucTQmN90jq/2lUwQnJZjIYIC/9YU=
 github.com/df-mc/goleveldb v1.1.9/go.mod h1:+NHCup03Sci5q84APIA21z3iPZCuk6m6ABtg4nANCSk=
 github.com/df-mc/worldupgrader v1.0.5 h1:cfjxL14MgFbxdLPE78exssIUom2EI6AKqV0LKoKP8BU=

@@ -4,7 +4,7 @@ go 1.18
 
 require (
 	github.com/df-mc/atomic v1.10.0
-	github.com/df-mc/dragonfly v0.9.5
+	github.com/df-mc/dragonfly v0.9.6-0.20230507195931-1877140372de
 	github.com/go-gl/mathgl v1.0.0
 	github.com/google/uuid v1.3.0
 )
