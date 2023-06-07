@@ -3,16 +3,16 @@
 package peex
 
 import (
+	"net"
+	"time"
+
 	"github.com/df-mc/dragonfly/server/block/cube"
 	"github.com/df-mc/dragonfly/server/cmd"
-	"github.com/df-mc/dragonfly/server/entity"
 	"github.com/df-mc/dragonfly/server/event"
 	"github.com/df-mc/dragonfly/server/item"
 	"github.com/df-mc/dragonfly/server/player/skin"
 	"github.com/df-mc/dragonfly/server/world"
 	"github.com/go-gl/mathgl/mgl64"
-	"net"
-	"time"
 )
 
 type eventId uint
@@ -296,7 +296,7 @@ type eventItemPickupHandler interface {
 }
 
 type eventItemDropHandler interface {
-	HandleItemDrop(ctx *event.Context, e *entity.Item)
+	HandleItemDrop(ctx *event.Context, e world.Entity)
 }
 
 type eventTransferHandler interface {
@@ -473,7 +473,7 @@ func (s *Session) HandleItemPickup(ctx *event.Context, i item.Stack) {
 	})
 }
 
-func (s *Session) HandleItemDrop(ctx *event.Context, e *entity.Item) {
+func (s *Session) HandleItemDrop(ctx *event.Context, e world.Entity) {
 	s.handleEvent(eventItemDrop, func(h Handler) {
 		h.(eventItemDropHandler).HandleItemDrop(ctx, e)
 	})
