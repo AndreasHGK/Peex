@@ -1,4 +1,4 @@
-module github.com/CosmoNetwork/peex
+module github.com/andreashgk/peex
 
 go 1.18
 
