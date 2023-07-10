@@ -284,7 +284,7 @@ type eventPunchAirHandler interface {
 }
 
 type eventSignEditHandler interface {
-	HandleSignEdit(ctx *event.Context, oldText, newText string)
+	HandleSignEdit(ctx *event.Context, frontSide bool, oldText, newText string)
 }
 
 type eventItemDamageHandler interface {
@@ -292,7 +292,7 @@ type eventItemDamageHandler interface {
 }
 
 type eventItemPickupHandler interface {
-	HandleItemPickup(ctx *event.Context, i item.Stack)
+	HandleItemPickup(ctx *event.Context, i *item.Stack)
 }
 
 type eventItemDropHandler interface {
@@ -455,9 +455,9 @@ func (s *Session) HandlePunchAir(ctx *event.Context) {
 	})
 }
 
-func (s *Session) HandleSignEdit(ctx *event.Context, oldText, newText string) {
+func (s *Session) HandleSignEdit(ctx *event.Context, frontSide bool, oldText, newText string) {
 	s.handleEvent(eventSignEdit, func(h Handler) {
-		h.(eventSignEditHandler).HandleSignEdit(ctx, oldText, newText)
+		h.(eventSignEditHandler).HandleSignEdit(ctx, frontSide, oldText, newText)
 	})
 }
 
@@ -467,7 +467,7 @@ func (s *Session) HandleItemDamage(ctx *event.Context, i item.Stack, damage int)
 	})
 }
 
-func (s *Session) HandleItemPickup(ctx *event.Context, i item.Stack) {
+func (s *Session) HandleItemPickup(ctx *event.Context, i *item.Stack) {
 	s.handleEvent(eventItemPickup, func(h Handler) {
 		h.(eventItemPickupHandler).HandleItemPickup(ctx, i)
 	})
