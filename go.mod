@@ -4,7 +4,7 @@ go 1.18
 
 require (
 	github.com/df-mc/atomic v1.10.0
-	github.com/df-mc/dragonfly v0.9.7
+	github.com/df-mc/dragonfly v0.9.8
 	github.com/go-gl/mathgl v1.0.0
 	github.com/google/uuid v1.3.0
 )
@@ -20,11 +20,11 @@ require (
 	github.com/muhammadmuzzammil1998/jsonc v1.0.0 // indirect
 	github.com/rogpeppe/go-internal v1.11.0 // indirect
 	github.com/sandertv/go-raknet v1.12.0 // indirect
-	github.com/sandertv/gophertunnel v1.30.0 // indirect
+	github.com/sandertv/gophertunnel v1.31.0 // indirect
 	github.com/sirupsen/logrus v1.9.3 // indirect
 	go.uber.org/atomic v1.11.0 // indirect
 	golang.org/x/crypto v0.11.0 // indirect
-	golang.org/x/exp v0.0.0-20230626212559-97b1e661b5df // indirect
+	golang.org/x/exp v0.0.0-20230711153332-06a737ee72cb // indirect
 	golang.org/x/image v0.9.0 // indirect
 	golang.org/x/net v0.12.0 // indirect
 	golang.org/x/oauth2 v0.10.0 // indirect
