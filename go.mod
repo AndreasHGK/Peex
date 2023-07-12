@@ -7,8 +7,6 @@ require (
 	github.com/df-mc/dragonfly v0.9.8
 	github.com/go-gl/mathgl v1.0.0
 	github.com/google/uuid v1.3.0
-	github.com/pelletier/go-toml v1.9.5
-	github.com/sirupsen/logrus v1.9.3
 )
 
 require (
@@ -23,6 +21,7 @@ require (
 	github.com/rogpeppe/go-internal v1.11.0 // indirect
 	github.com/sandertv/go-raknet v1.12.0 // indirect
 	github.com/sandertv/gophertunnel v1.31.0 // indirect
+	github.com/sirupsen/logrus v1.9.3 // indirect
 	go.uber.org/atomic v1.11.0 // indirect
 	golang.org/x/crypto v0.11.0 // indirect
 	golang.org/x/exp v0.0.0-20230711153332-06a737ee72cb // indirect
