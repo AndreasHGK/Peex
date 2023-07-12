@@ -49,6 +49,7 @@ const (
 	eventTransfer
 	eventCommandExecution
 	eventQuit
+	eventLecternPageTurn
 )
 
 // getHandlerEvents returns which events a handler implements. Since it is impossible to distinguish actually imlemented
@@ -150,6 +151,9 @@ func getHandlerEvents(h Handler) map[eventId]struct{} {
 	if _, ok := h.(eventQuitHandler); ok {
 		m[eventQuit] = struct{}{}
 	}
+	if _, ok := h.(eventLecternPageTurnHandler); ok {
+		m[eventLecternPageTurn] = struct{}{}
+	}
 	return m
 }
 
@@ -185,6 +189,7 @@ var allEvents = map[string]eventId{
 	"eventTransfer":         eventTransfer,
 	"eventCommandExecution": eventCommandExecution,
 	"eventQuit":             eventQuit,
+	"eventLecternPageTurn":  eventLecternPageTurn,
 }
 
 type eventMoveHandler interface {
@@ -309,6 +314,10 @@ type eventCommandExecutionHandler interface {
 
 type eventQuitHandler interface {
 	HandleQuit()
+}
+
+type eventLecternPageTurnHandler interface {
+	HandleLecternPageTurn(ctx *event.Context, pos cube.Pos, oldPage int, newPage *int)
 }
 
 func (s *Session) HandleMove(ctx *event.Context, newPos mgl64.Vec3, newYaw, newPitch float64) {
@@ -496,4 +505,10 @@ func (s *Session) HandleQuit() {
 		h.(eventQuitHandler).HandleQuit()
 	})
 	s.doQuit()
+}
+
+func (s *Session) HandleLecternPageTurn(ctx *event.Context, pos cube.Pos, oldPage int, newPage *int) {
+	s.handleEvent(eventLecternPageTurn, func(h Handler) {
+		h.(eventLecternPageTurnHandler).HandleLecternPageTurn(ctx, pos, oldPage, newPage)
+	})
 }
